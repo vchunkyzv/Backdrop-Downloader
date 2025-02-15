@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backdrop Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            max-width: 600px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Backdrop Downloader</h1>
+    <p>Configure your settings and start downloading backdrops.</p>
+    
+    <form id="backdropForm">
+        <label for="tmdb_api">TMDB API Key:</label>
+        <input type="text" id="tmdb_api" placeholder="Enter your TMDB API key">
+        
+        <label for="tvdb_api">TVDB API Key:</label>
+        <input type="text" id="tvdb_api" placeholder="Enter your TVDB API key">
+        
+        <label for="fanart_api">Fanart.tv API Key:</label>
+        <input type="text" id="fanart_api" placeholder="Enter your Fanart.tv API key">
+        
+        <label for="movies_folder">Movies Folder Path:</label>
+        <input type="text" id="movies_folder" placeholder="e.g., /volume1/Movies">
+        
+        <label for="tvshows_folder">TV Shows Folder Path:</label>
+        <input type="text" id="tvshows_folder" placeholder="e.g., /volume1/TV Shows">
+        
+        <label for="movies_structure">Movies Folder Structure:</label>
+        <input type="text" id="movies_structure" placeholder="e.g., {Movie Title} ({Year}) {tmdb-ID}">
+        
+        <label for="tvshows_structure">TV Shows Folder Structure:</label>
+        <input type="text" id="tvshows_structure" placeholder="e.g., {Series Title} {tvdb-ID}">
+        
+        <label for="source_selection">Select Backdrop Source:</label>
+        <select id="source_selection">
+            <option value="tmdb">TMDB</option>
+            <option value="tvdb">TVDB</option>
+            <option value="fanart">Fanart.tv</option>
+            <option value="tmdb_tvdb">TMDB (Movies) / TVDB (Shows)</option>
+            <option value="fanart_tvdb">Fanart.tv (Movies) / TVDB (Shows)</option>
+        </select>
+        
+        <label for="backdrop_limit">Number of Backdrops per Title:</label>
+        <input type="number" id="backdrop_limit" min="1" placeholder="Enter a number or leave blank for all">
+        
+        <label for="run_frequency">Run Frequency:</label>
+        <select id="run_frequency">
+            <option value="manual">Manual</option>
+            <option value="weekly">Weekly</option>
+        </select>
+        
+        <button type="submit">Start Download</button>
+    </form>
+</body>
+</html>
+
