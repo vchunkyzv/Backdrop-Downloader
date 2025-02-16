@@ -23,19 +23,24 @@ Once downloaded, backdrops are saved in:
 /config/
 ├── settings.conf  # Stores user preferences & API keys
 ├── Backdrops/
-│   ├── Movies/       # Contains movie-specific backdrops
-│   │   ├── [Movie Name (Year)]/
-│   │   │   ├── backdrop1.jpg
-│   │   │   ├── backdrop2.jpg
-│   ├── TV Shows/     # Contains TV show-specific backdrops
-│   │   ├── [TV Show Name (Year)]/
-│   │   │   ├── background1.jpg
-│   │   │   ├── background2.jpg
+│   ├── All_Backdrops/  # Contains all downloaded backdrops
+│   │   ├── backdrop1.jpg
+│   │   ├── backdrop2.jpg
 ```
 
 ## 🛠 Installation
 
-### **1️⃣ Pull the Docker Image (Coming Soon)**
+### **1️⃣ Prepare the Directory Structure**
+
+Before running the container, manually create the required directories:
+
+```bash
+mkdir -p /path/to/Backdrop-Downloader/config
+```
+
+This ensures the container can properly store settings and downloaded backdrops.
+
+### **2️⃣ Pull the Docker Image**
 
 Once the image is on Docker Hub, you’ll be able to pull it using:
 
@@ -43,7 +48,7 @@ Once the image is on Docker Hub, you’ll be able to pull it using:
 docker pull vchunkyzv/backdrop-downloader
 ```
 
-### **2️⃣ Run the Container**
+### **3️⃣ Run the Container**
 
 Use the following command to start the container:
 
@@ -51,16 +56,13 @@ Use the following command to start the container:
 docker run -d \
   --name=backdrop-downloader \
   -p 8500:8500 \
-  -v /path/to/movies:/movies \
-  -v /path/to/tvshows:/tvshows \
-  -v /path/to/config:/config \
+  -v /path/to/Backdrop-Downloader/config:/config \
   vchunkyzv/backdrop-downloader
 ```
 
-💡 Replace `/path/to/movies` and `/path/to/tvshows` with your actual movie & TV show source folders.\
-💡 Replace `/path/to/config` with where you want the configuration to be stored.
+💡 Replace `/path/to/Backdrop-Downloader/config` with the actual directory where you want the configuration and backdrops to be stored.
 
-### **3️⃣ Access the Web GUI**
+### **4️⃣ Access the Web GUI**
 
 Once running, open your browser and go to:
 
