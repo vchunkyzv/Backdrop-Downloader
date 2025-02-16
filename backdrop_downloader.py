@@ -1,104 +1,171 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import os
-import json
 import requests
+import time
+import random
+import json
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
 
 app = Flask(__name__)
 
-# Config file path
-CONFIG_PATH = "/config/settings.conf"
-DEFAULT_CONFIG = {
-    "tmdb_api_key": "",
-    "tvdb_api_key": "",
-    "fanart_api_key": "",
-    "movies_source": "",
-    "shows_source": "",
-    "backdrop_limit": "All",
-    "preferred_source": "TMDB"
+# Configuration paths
+CONFIG_DIR = "/config"
+BACKDROP_DIR = os.path.join(CONFIG_DIR, "Backdrops", "All_Backdrops")
+LOG_FILE = os.path.join(CONFIG_DIR, "latest_log.txt")
+TITLES_FILE = os.path.join(CONFIG_DIR, "titles.json")
+CONFIG_FILE = os.path.join(CONFIG_DIR, "settings.json")
+
+# Ensure backdrop directory exists
+os.makedirs(BACKDROP_DIR, exist_ok=True)
+
+scheduler = BackgroundScheduler()
+
+# Default configuration
+default_config = {
+    "tmdb_api": "",
+    "tvdb_api": "",
+    "fanart_api": "",
+    "movies_source": "TMDB",
+    "tvshows_source": "TVDB",
+    "backdrop_limit": "10",
+    "run_frequency": "manual",
+    "schedule_day": "monday",
+    "schedule_time": "12:00"
 }
 
-# Load configuration
-if os.path.exists(CONFIG_PATH):
-    with open(CONFIG_PATH, "r") as f:
-        config = json.load(f)
-else:
-    config = DEFAULT_CONFIG
-    with open(CONFIG_PATH, "w") as f:
-        json.dump(config, f, indent=4)
+# Load or create config
+if not os.path.exists(CONFIG_FILE):
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(default_config, f)
 
-# Ensure Backdrop folders exist
-BACKDROP_DIR = "/config/Backdrops"
-MOVIE_BACKDROP_DIR = os.path.join(BACKDROP_DIR, "Movies")
-TV_BACKDROP_DIR = os.path.join(BACKDROP_DIR, "TV Shows")
-os.makedirs(MOVIE_BACKDROP_DIR, exist_ok=True)
-os.makedirs(TV_BACKDROP_DIR, exist_ok=True)
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            return json.load(f)
+    return default_config
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+def save_config(config):
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(config, f)
 
-@app.route("/save_config", methods=["POST"])
-def save_config():
-    data = request.json
-    config.update(data)
-    with open(CONFIG_PATH, "w") as f:
-        json.dump(config, f, indent=4)
-    return jsonify({"message": "Configuration updated successfully!"})
+def log_download(message):
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    with open(LOG_FILE, "a") as log:
+        log.write(f"{timestamp} - {message}\n")
 
-@app.route("/fetch_backdrops", methods=["POST"])
-def fetch_backdrops():
-    source = request.json.get("source")
-    limit = request.json.get("limit")
+def download_backdrop(title, source, media_type, media_id):
+    config = load_config()
+    api_key = config[f"{source.lower()}_api"]
+    if not api_key:
+        log_download(f"API key missing for {source}")
+        return
+
+    backdrop_url = ""
     if source == "TMDB":
-        return fetch_tmdb_backdrops(limit)
+        url = f"https://api.themoviedb.org/3/{media_type}/{media_id}/images?api_key={api_key}"
+        response = requests.get(url).json()
+        if "backdrops" in response and response["backdrops"]:
+            backdrop_url = f"https://image.tmdb.org/t/p/original{response['backdrops'][0]['file_path']}"
     elif source == "TVDB":
-        return fetch_tvdb_backdrops(limit)
+        # TVDB API requires authentication, implement proper calls here
+        pass
     elif source == "Fanart":
-        return fetch_fanart_backdrops(limit)
-    return jsonify({"error": "Invalid source selection"}), 400
+        url = f"https://webservice.fanart.tv/v3/{media_type}/{media_id}?api_key={api_key}"
+        response = requests.get(url).json()
+        if media_type == "movie" and "moviebackground" in response:
+            backdrop_url = response["moviebackground"][0]["url"]
+        elif media_type == "tv" and "showbackground" in response:
+            backdrop_url = response["showbackground"][0]["url"]
 
-# Fetch TMDB Backdrops
-def fetch_tmdb_backdrops(limit):
-    api_key = config["tmdb_api_key"]
-    if not api_key:
-        return jsonify({"error": "TMDB API key is missing"}), 400
-    
-    movies_folder = config["movies_source"]
-    for movie in os.listdir(movies_folder):
-        if "tmdb-" in movie:
-            tmdb_id = movie.split("tmdb-")[1].strip("}")
-            url = f"https://api.themoviedb.org/3/movie/{tmdb_id}/images?api_key={api_key}"
-            response = requests.get(url)
-            if response.status_code == 200:
-                images = response.json().get("backdrops", [])[:int(limit)]
-                save_images(images, movie, MOVIE_BACKDROP_DIR)
-    return jsonify({"message": "TMDB Backdrops fetched successfully!"})
-
-# Fetch TVDB Backdrops
-def fetch_tvdb_backdrops(limit):
-    api_key = config["tvdb_api_key"]
-    if not api_key:
-        return jsonify({"error": "TVDB API key is missing"}), 400
-    # TVDB API request handling here...
-    return jsonify({"message": "TVDB Backdrops fetched successfully!"})
-
-# Fetch Fanart Backdrops
-def fetch_fanart_backdrops(limit):
-    api_key = config["fanart_api_key"]
-    if not api_key:
-        return jsonify({"error": "Fanart API key is missing"}), 400
-    # Fanart API request handling here...
-    return jsonify({"message": "Fanart Backdrops fetched successfully!"})
-
-# Save images to respective folders
-def save_images(images, title, dest_folder):
-    title_path = os.path.join(dest_folder, title)
-    os.makedirs(title_path, exist_ok=True)
-    for index, image in enumerate(images):
-        img_url = f"https://image.tmdb.org/t/p/original{image['file_path']}"
-        img_data = requests.get(img_url).content
-        with open(os.path.join(title_path, f"backdrop_{index+1}.jpg"), "wb") as f:
+    if backdrop_url:
+        img_data = requests.get(backdrop_url).content
+        file_name = f"{title.replace(' ', '_')}_{source}.jpg"
+        file_path = os.path.join(BACKDROP_DIR, file_name)
+        with open(file_path, "wb") as f:
             f.write(img_data)
+        log_download(f"Downloaded {file_name} from {source}")
+    else:
+        log_download(f"No backdrops found for {title} on {source}")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8500, debug=True)
+@app.route('/')
+def index():
+    config = load_config()
+    return render_template("index.html", config=config)
+
+@app.route('/config', methods=['POST'])
+def update_config():
+    data = request.json
+    config = {
+        "tmdb_api": data.get("tmdb_api", ""),
+        "tvdb_api": data.get("tvdb_api", ""),
+        "fanart_api": data.get("fanart_api", ""),
+        "movies_source": data.get("movies_source", "TMDB"),
+        "tvshows_source": data.get("tvshows_source", "TVDB"),
+        "backdrop_limit": data.get("backdrop_limit", "10"),
+        "run_frequency": data.get("run_frequency", "manual"),
+        "schedule_day": data.get("schedule_day", "monday").lower(),
+        "schedule_time": data.get("schedule_time", "12:00")
+    }
+    save_config(config)
+    schedule_download()
+    return jsonify({"message": "Configuration updated", "config": config})
+
+@app.route('/Backdrops/All_Backdrops/<filename>')
+def serve_backdrop(filename):
+    """ Serves the requested backdrop file """
+    file_path = os.path.join(BACKDROP_DIR, filename)
+    if os.path.exists(file_path):
+        return send_file(file_path, mimetype='image/jpeg')
+    return "Not Found", 404
+
+@app.route('/random-backdrop')
+def random_backdrop():
+    """ Selects a random backdrop to serve """
+    files = [f for f in os.listdir(BACKDROP_DIR) if f.endswith(".jpg")]
+    if files:
+        random_file = random.choice(files)
+        return send_file(os.path.join(BACKDROP_DIR, random_file), mimetype='image/jpeg')
+    return "Not Found", 404
+
+def schedule_download():
+    config = load_config()
+    if config["run_frequency"] == "weekly":
+        day_of_week_map = {
+            "monday": "mon",
+            "tuesday": "tue",
+            "wednesday": "wed",
+            "thursday": "thu",
+            "friday": "fri",
+            "saturday": "sat",
+            "sunday": "sun"
+        }
+        day_of_week = day_of_week_map.get(config["schedule_day"].lower(), "mon")  # Default to Monday if invalid
+        schedule_time = config["schedule_time"]
+        hour, minute = map(int, schedule_time.split(":"))
+
+        scheduler.add_job(
+            run_scheduled_download,
+            'cron',
+            day_of_week=day_of_week,
+            hour=hour,
+            minute=minute,
+            id='weekly_download',
+            replace_existing=True
+        )
+        scheduler.start()
+
+def run_scheduled_download():
+    log_download("Scheduled weekly download initiated.")
+    # Here, implement logic to fetch movie/TV show list and call `download_backdrop`
+
+@app.route('/run-now', methods=['POST'])
+def run_now():
+    log_download("Manual run initiated.")
+    # Implement fetching movie/TV list and calling `download_backdrop`
+    return jsonify({"message": "Backdrop download started."})
+
+if __name__ == '__main__':
+    schedule_download()
+    app.run(host='0.0.0.0', port=8500, debug=True)
+
