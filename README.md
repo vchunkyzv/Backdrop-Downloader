@@ -2,15 +2,15 @@
 
 ## 📌 Overview
 
-Backdrop Downloader is a web-based tool that automatically fetches and downloads **backdrops** (posters, wallpapers) for your **movies and TV shows** stored on a NAS or local drive. It supports **TMDB, TVDB, and Fanart.tv**, allowing users to mix and match sources.
+Backdrop Downloader is a web-based tool that automatically fetches and downloads **backdrops** (posters, wallpapers) for your **movies and TV shows** stored on a NAS or local drive. It supports **TMDB and Fanart.tv**, allowing users to mix and match sources.
 
 The tool runs inside a **Docker container** and provides a **web-based GUI** accessible from any device on the network.
 
 ## 🚀 Features
 
-✔ **Custom Folder Parsing** – Detects TMDB/TVDB IDs from user-defined folder naming structures\
-✔ **Supports TMDB, TVDB & Fanart.tv** – Choose where to fetch backdrops from\
-✔ **Web-Based GUI** – Easily control the tool from a browser (`http://NAS_IP:8500`)\
+✔ **Custom Folder Parsing** – Detects TMDB IDs from user-defined folder naming structures\
+✔ **Supports TMDB & Fanart.tv** – Fetch backdrops using TMDB IDs (Fanart.tv uses TMDB IDs for movies and TVDB IDs for TV shows).\
+✔ **Web-Based GUI** – Easily control the tool from a browser (`http://NAS_IP:8500`)\  
 ✔ **Manual Input for Backdrop Limits** – Enter the number of backdrops to download (or select "All")\
 ✔ **Automatic Organization** – Saves backdrops in structured folders inside the Docker container\
 ✔ **Runs on Docker** – Lightweight, easy to deploy
@@ -68,5 +68,3 @@ This project is licensed under the **MIT License**.
 ## 📢 Contributions
 
 Contributions, feature requests, and bug reports are welcome! Open an issue or fork the repository.
-
----
