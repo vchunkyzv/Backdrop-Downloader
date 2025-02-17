@@ -15,30 +15,16 @@ The tool runs inside a **Docker container** and provides a **web-based GUI** acc
 ✔ **Automatic Organization** – Saves backdrops in structured folders inside the Docker container\
 ✔ **Runs on Docker** – Lightweight, easy to deploy
 
-## 👤 Folder Structure
-
-Once downloaded, backdrops are saved in:
-
-```
-/config/
-├── settings.conf  # Stores user preferences & API keys
-├── Backdrops/
-│   ├── All_Backdrops/  # Contains all downloaded backdrops
-│   │   ├── backdrop1.jpg
-│   │   ├── backdrop2.jpg
-```
-
 ## 🛠 Installation
 
-### **1️⃣ Prepare the Directory Structure**
-
-Before running the container, manually create the required directories:
+### **1️⃣ Create Necessary Folders**
+Before running the container, create the required directories for configuration:
 
 ```bash
-mkdir -p /path/to/Backdrop-Downloader/config
+mkdir -p /path/to/Backdrop-Downloader/config /path/to/Backdrop-Downloader/templates
 ```
 
-This ensures the container can properly store settings and downloaded backdrops.
+This ensures that settings and downloaded images persist across container restarts.
 
 ### **2️⃣ Pull the Docker Image**
 
@@ -54,13 +40,16 @@ Use the following command to start the container:
 
 ```bash
 docker run -d \
-  --name=backdrop-downloader \
-  -p 8500:8500 \
-  -v /path/to/Backdrop-Downloader/config:/config \
-  vchunkyzv/backdrop-downloader
+   --name=backdrop-downloader \
+   -p 8500:8500 \
+   -v /path/to/movies:/movies:ro \
+   -v /path/to/tvshows:/tvshows:ro \
+   -v /path/to/Backdrop-Downloader/config:/config \
+   vchunkyzv/backdrop-downloader
 ```
 
-💡 Replace `/path/to/Backdrop-Downloader/config` with the actual directory where you want the configuration and backdrops to be stored.
+💡 Replace `/path/to/movies` and `/path/to/tvshows` with your actual movie & TV show source folders.\
+💡 Replace `/path/to/Backdrop-Downloader/config` with where you want the configuration to be stored.
 
 ### **4️⃣ Access the Web GUI**
 
