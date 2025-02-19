@@ -161,14 +161,14 @@
             let traktFields = document.getElementById("trakt_fields");
 
             if (dataSource === "My Devices") {
-                localPaths.classList.remove("hidden");
-                traktFields.classList.add("hidden");
+                localPaths.style.display = "block";  // Show My Devices inputs
+                traktFields.style.display = "none";  // Hide Trakt List inputs
             } else if (dataSource === "Trakt List") {
-                traktFields.classList.remove("hidden");
-                localPaths.classList.add("hidden");
+                traktFields.style.display = "block"; // Show Trakt List inputs
+                localPaths.style.display = "none";   // Hide My Devices inputs
             } else {
-                localPaths.classList.add("hidden");
-                traktFields.classList.add("hidden");
+                localPaths.style.display = "none";  // Hide both just in case
+                traktFields.style.display = "none";
             }
         }
 
