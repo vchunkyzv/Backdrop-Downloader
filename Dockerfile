@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Install required dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir flask requests apscheduler
 
 # Expose port 8500 for the web interface
 EXPOSE 8500
