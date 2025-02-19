@@ -54,14 +54,14 @@
             <input type="text" id="fanart_api" placeholder="Enter your Fanart.tv API key">
 
             <!-- Data Source Selection -->
-            <label for="data_source">Data Source:</label>
+            <label for="data_source">List Source:</label>
             <select id="data_source" name="data_source" onchange="toggleSourceFields()">
                 <option value="My Devices">My Devices</option>
                 <option value="Trakt List">Trakt List</option>
             </select>
 
-            <!-- My Devices Fields -->
-            <div id="local_paths">
+            <!-- My Devices Fields (Initially Hidden) -->
+            <div id="local_paths" class="hidden">
                 <label for="movies_folder">Movies Folder Path:</label>
                 <input type="text" id="movies_folder" placeholder="e.g., /volume1/Movies">
 
@@ -69,18 +69,14 @@
                 <input type="text" id="tvshows_folder" placeholder="e.g., /volume1/TV Shows">
             </div>
 
-            <!-- Trakt List Fields (Hidden by Default) -->
+            <!-- Trakt List Fields (Initially Hidden) -->
             <div id="trakt_fields" class="hidden">
-                <label for="trakt_movies_list">Trakt Movies & TV Shows List URL:</label>
-                <input type="text" id="trakt_movies_list" placeholder="Enter Trakt List URL">
+                <label for="trakt_movies_list">Trakt Movies List URL:</label>
+                <input type="text" id="trakt_movies_list" placeholder="Enter Trakt Movies List URL">
+
+                <label for="trakt_tvshows_list">Trakt TV Shows List URL:</label>
+                <input type="text" id="trakt_tvshows_list" placeholder="Enter Trakt TV Shows List URL">
             </div>
-
-            <!-- Folder Structure -->
-            <label for="movies_structure">Movies Folder Structure:</label>
-            <input type="text" id="movies_structure" placeholder="e.g., {Movie Title} ({Year}) {tmdb-ID}">
-
-            <label for="tvshows_structure">TV Shows Folder Structure:</label>
-            <input type="text" id="tvshows_structure" placeholder="e.g., {Series Title} {tvdb-ID}">
 
             <!-- Backdrop Source Selection -->
             <label>Select Backdrop Source for Movies:</label>
@@ -174,8 +170,19 @@
 
         function toggleSourceFields() {
             let dataSource = document.getElementById("data_source").value;
-            document.getElementById("local_paths").style.display = (dataSource === "My Devices") ? "block" : "none";
-            document.getElementById("trakt_fields").style.display = (dataSource === "Trakt List") ? "block" : "none";
+            let localPaths = document.getElementById("local_paths");
+            let traktFields = document.getElementById("trakt_fields");
+
+            if (dataSource === "My Devices") {
+                localPaths.style.display = "block";
+                traktFields.style.display = "none";
+            } else if (dataSource === "Trakt List") {
+                localPaths.style.display = "none";
+                traktFields.style.display = "block";
+            } else {
+                localPaths.style.display = "none";
+                traktFields.style.display = "none";
+            }
         }
 
         function runNow() {
