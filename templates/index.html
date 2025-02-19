@@ -7,81 +7,188 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            max-width: 600px;
-            background-color: #f4f4f4;
-        }
-        h1 {
             text-align: center;
+            background: url('/random-backdrop') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 30px;
+            width: 60%;
+            text-align: left;
+        }
+        select, input, button {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            width: 100%;
+            display: block;
         }
         label {
             font-weight: bold;
+            display: block;
+            margin-top: 15px;
         }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>Backdrop Downloader</h1>
-    <p>Configure your settings and start downloading backdrops.</p>
-    
-    <form id="backdropForm">
-        <label for="tmdb_api">TMDB API Key:</label>
-        <input type="text" id="tmdb_api" placeholder="Enter your TMDB API key">
-        
-        <label for="tvdb_api">TVDB API Key:</label>
-        <input type="text" id="tvdb_api" placeholder="Enter your TVDB API key">
-        
-        <label for="fanart_api">Fanart.tv API Key:</label>
-        <input type="text" id="fanart_api" placeholder="Enter your Fanart.tv API key">
-        
-        <label for="movies_folder">Movies Folder Path:</label>
-        <input type="text" id="movies_folder" placeholder="e.g., /volume1/Movies">
-        
-        <label for="tvshows_folder">TV Shows Folder Path:</label>
-        <input type="text" id="tvshows_folder" placeholder="e.g., /volume1/TV Shows">
-        
-        <label for="movies_structure">Movies Folder Structure:</label>
-        <input type="text" id="movies_structure" placeholder="e.g., {Movie Title} ({Year}) {tmdb-ID}">
-        
-        <label for="tvshows_structure">TV Shows Folder Structure:</label>
-        <input type="text" id="tvshows_structure" placeholder="e.g., {Series Title} {tvdb-ID}">
-        
-        <label for="source_selection">Select Backdrop Source:</label>
-        <select id="source_selection">
-            <option value="tmdb">TMDB</option>
-            <option value="tvdb">TVDB</option>
-            <option value="fanart">Fanart.tv</option>
-            <option value="tmdb_tvdb">TMDB (Movies) / TVDB (Shows)</option>
-            <option value="fanart_tvdb">Fanart.tv (Movies) / TVDB (Shows)</option>
-        </select>
-        
-        <label for="backdrop_limit">Number of Backdrops per Title:</label>
-        <input type="number" id="backdrop_limit" min="1" placeholder="Enter a number or leave blank for all">
-        
-        <label for="run_frequency">Run Frequency:</label>
-        <select id="run_frequency">
-            <option value="manual">Manual</option>
-            <option value="weekly">Weekly</option>
-        </select>
-        
-        <button type="submit">Start Download</button>
-    </form>
+    <div class="container">
+        <h1>Backdrop Downloader</h1>
+        <p>Configure your settings and start downloading backdrops.</p>
+
+        <form id="backdropForm">
+            <!-- API Keys -->
+            <label for="tmdb_api">TMDB API Key:</label>
+            <input type="text" id="tmdb_api" placeholder="Enter your TMDB API key">
+
+            <label for="tvdb_api">TVDB API Key:</label>
+            <input type="text" id="tvdb_api" placeholder="Enter your TVDB API key">
+
+            <label for="fanart_api">Fanart.tv API Key:</label>
+            <input type="text" id="fanart_api" placeholder="Enter your Fanart.tv API key">
+
+            <!-- Data Source Selection -->
+            <label for="data_source">Data Source:</label>
+            <select id="data_source" name="data_source" onchange="toggleSourceFields()">
+                <option value="My Devices">My Devices</option>
+                <option value="Trakt List">Trakt List</option>
+            </select>
+
+            <!-- My Devices Fields -->
+            <div id="local_paths">
+                <label for="movies_folder">Movies Folder Path:</label>
+                <input type="text" id="movies_folder" placeholder="e.g., /volume1/Movies">
+
+                <label for="tvshows_folder">TV Shows Folder Path:</label>
+                <input type="text" id="tvshows_folder" placeholder="e.g., /volume1/TV Shows">
+            </div>
+
+            <!-- Trakt List Fields (Hidden by Default) -->
+            <div id="trakt_fields" class="hidden">
+                <label for="trakt_movies_list">Trakt Movies & TV Shows List URL:</label>
+                <input type="text" id="trakt_movies_list" placeholder="Enter Trakt List URL">
+            </div>
+
+            <!-- Folder Structure -->
+            <label for="movies_structure">Movies Folder Structure:</label>
+            <input type="text" id="movies_structure" placeholder="e.g., {Movie Title} ({Year}) {tmdb-ID}">
+
+            <label for="tvshows_structure">TV Shows Folder Structure:</label>
+            <input type="text" id="tvshows_structure" placeholder="e.g., {Series Title} {tvdb-ID}">
+
+            <!-- Backdrop Source Selection -->
+            <label>Select Backdrop Source for Movies:</label>
+            <select id="movies_source">
+                <option value="TMDB">TMDB</option>
+                <option value="TVDB">TVDB</option>
+                <option value="Fanart">Fanart.tv</option>
+            </select>
+
+            <label>Select Backdrop Source for TV Shows:</label>
+            <select id="tvshows_source">
+                <option value="TMDB">TMDB</option>
+                <option value="TVDB">TVDB</option>
+                <option value="Fanart">Fanart.tv</option>
+            </select>
+
+            <!-- Other Settings -->
+            <label for="backdrop_limit">Number of Backdrops per Title:</label>
+            <input type="number" id="backdrop_limit" min="1" placeholder="Enter a number or leave blank for all">
+
+            <label for="run_frequency">Run Frequency:</label>
+            <select id="run_frequency" onchange="toggleScheduleOptions()">
+                <option value="manual">Manual</option>
+                <option value="weekly">Weekly</option>
+            </select>
+
+            <!-- Weekly Schedule Options (Hidden by Default) -->
+            <div id="scheduleOptions" class="hidden">
+                <label for="schedule_day">Select Day of the Week:</label>
+                <select id="schedule_day">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+
+                <label for="schedule_time">Select Time:</label>
+                <input type="time" id="schedule_time">
+            </div>
+
+            <!-- Buttons -->
+            <button type="button" onclick="saveConfig()">Save Config</button>
+            <button type="button" onclick="runNow()">Start Backdrop Download</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleScheduleOptions() {
+            let frequency = document.getElementById("run_frequency").value;
+            let scheduleOptions = document.getElementById("scheduleOptions");
+            scheduleOptions.style.display = (frequency === "weekly") ? "block" : "none";
+        }
+
+        function saveConfig() {
+            let config = {
+                tmdb_api: document.getElementById("tmdb_api").value,
+                tvdb_api: document.getElementById("tvdb_api").value,
+                fanart_api: document.getElementById("fanart_api").value,
+                data_source: document.getElementById("data_source").value,
+                movies_folder: document.getElementById("movies_folder").value,
+                tvshows_folder: document.getElementById("tvshows_folder").value,
+                trakt_movies_list: document.getElementById("trakt_movies_list").value,
+                movies_structure: document.getElementById("movies_structure").value,
+                tvshows_structure: document.getElementById("tvshows_structure").value,
+                movies_source: document.getElementById("movies_source").value,
+                tvshows_source: document.getElementById("tvshows_source").value,
+                backdrop_limit: document.getElementById("backdrop_limit").value,
+                run_frequency: document.getElementById("run_frequency").value,
+                schedule_day: document.getElementById("schedule_day").value,
+                schedule_time: document.getElementById("schedule_time").value
+            };
+
+            fetch('/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config)
+            }).then(response => response.json())
+            .then(data => alert(data.message));
+        }
+
+            fetch('/config', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(config)
+            }).then(response => response.json())
+              .then(data => alert(data.message));
+        }
+
+        function toggleSourceFields() {
+            let dataSource = document.getElementById("data_source").value;
+            document.getElementById("local_paths").style.display = (dataSource === "My Devices") ? "block" : "none";
+            document.getElementById("trakt_fields").style.display = (dataSource === "Trakt List") ? "block" : "none";
+        }
+
+        function runNow() {
+            fetch('/run-now', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => alert(data.message));
+        }
+
+        window.onload = function() {
+            toggleScheduleOptions();
+            toggleSourceFields();
+        };
+    </script>
 </body>
 </html>
-
