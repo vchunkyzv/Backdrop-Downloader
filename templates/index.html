@@ -82,14 +82,12 @@
             <label>Select Backdrop Source for Movies:</label>
             <select id="movies_source">
                 <option value="TMDB">TMDB</option>
-                <option value="TVDB">TVDB</option>
                 <option value="Fanart">Fanart.tv</option>
             </select>
 
             <label>Select Backdrop Source for TV Shows:</label>
             <select id="tvshows_source">
                 <option value="TMDB">TMDB</option>
-                <option value="TVDB">TVDB</option>
                 <option value="Fanart">Fanart.tv</option>
             </select>
 
@@ -136,14 +134,11 @@
         function saveConfig() {
             let config = {
                 tmdb_api: document.getElementById("tmdb_api").value,
-                tvdb_api: document.getElementById("tvdb_api").value,
                 fanart_api: document.getElementById("fanart_api").value,
                 data_source: document.getElementById("data_source").value,
                 movies_folder: document.getElementById("movies_folder").value,
                 tvshows_folder: document.getElementById("tvshows_folder").value,
                 trakt_movies_list: document.getElementById("trakt_movies_list").value,
-                movies_structure: document.getElementById("movies_structure").value,
-                tvshows_structure: document.getElementById("tvshows_structure").value,
                 movies_source: document.getElementById("movies_source").value,
                 tvshows_source: document.getElementById("tvshows_source").value,
                 backdrop_limit: document.getElementById("backdrop_limit").value,
@@ -159,29 +154,21 @@
             }).then(response => response.json())
             .then(data => alert(data.message));
         }
-
-            fetch('/config', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(config)
-            }).then(response => response.json())
-              .then(data => alert(data.message));
-        }
-
+            
         function toggleSourceFields() {
             let dataSource = document.getElementById("data_source").value;
             let localPaths = document.getElementById("local_paths");
             let traktFields = document.getElementById("trakt_fields");
 
             if (dataSource === "My Devices") {
-                localPaths.style.display = "block";
-                traktFields.style.display = "none";
+                localPaths.classList.remove("hidden");
+                traktFields.classList.add("hidden");
             } else if (dataSource === "Trakt List") {
-                localPaths.style.display = "none";
-                traktFields.style.display = "block";
+                traktFields.classList.remove("hidden");
+                localPaths.classList.add("hidden");
             } else {
-                localPaths.style.display = "none";
-                traktFields.style.display = "none";
+                localPaths.classList.add("hidden");
+                traktFields.classList.add("hidden");
             }
         }
 
